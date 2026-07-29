@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Função para verificar se o usuário é o administrador autenticado via Google
+    function isAdmin() {
+      return request.auth != null 
+        && request.auth.token.email != null 
+        && request.auth.token.email.lower() == 'emanoelcarmo00@gmail.com';
+    }
+
+    // 1. Coleção de Pedidos (orders)
+    match /orders/{orderId} {
+      // Qualquer cliente pode ler (para rastrear pedidos) e criar novos pedidos
+      allow read, create: if true;
+      // Apenas o Administrador (Emanoelcarmo00@gmail.com) pode atualizar o status ou excluir pedidos
+      allow update, delete: if isAdmin();
+    }
+
+    // 2. Coleção de Produtos/Cardápio (products)
+    match /products/{productId} {
+      // Leitura pública do cardápio
+      allow read: if true;
+      // Apenas o Administrador pode criar, editar ou apagar produtos
+      allow write, create, update, delete: if isAdmin();
+    }
+
+    // 3. Coleção de Bairros e Taxas de Entrega (neighborhoods)
+    match /neighborhoods/{neighborhoodId} {
+      // Leitura pública dos bairros e taxas de entrega
+      allow read: if true;
+      // Apenas o Administrador pode cadastrar, editar ou apagar bairros e taxas
+      allow write, create, update, delete: if isAdmin();
+    }
+
+    // 4. Coleção de Configurações da Loja (settings)
+    match /settings/{settingId} {
+      // Leitura pública das configurações (tema, funcionamento, etc.)
+      allow read: if true;
+      // Apenas o Administrador pode alterar as configurações da loja
+      allow write, create, update, delete: if isAdmin();
+    }
+  }
+}
