@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, LogIn, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { X, LogIn, ShieldAlert } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
@@ -20,7 +20,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [manualEmail, setManualEmail] = useState('');
 
   const validateAndLogin = (email: string) => {
     const cleanEmail = email.trim().toLowerCase();
@@ -52,11 +51,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    validateAndLogin(manualEmail);
   };
 
   return (
@@ -118,28 +112,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             </svg>
             <span>{loading ? 'Conectando ao Google...' : 'Entrar com Conta Google'}</span>
           </button>
-
-          <div className="pt-2 border-t border-zinc-800/80 text-left">
-            <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider block mb-1">
-              Confirmar E-mail Google Autorizado:
-            </label>
-            <form onSubmit={handleManualSubmit} className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Emanoelcarmo00@gmail.com"
-                value={manualEmail}
-                onChange={(e) => setManualEmail(e.target.value)}
-                className="flex-1 bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-500 text-xs px-3 py-2.5 rounded-xl focus:border-orange-500 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-orange-500 hover:bg-orange-400 text-black font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-center shrink-0 gap-1"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Entrar</span>
-              </button>
-            </form>
-          </div>
         </div>
       </div>
     </div>

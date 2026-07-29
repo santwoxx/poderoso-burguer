@@ -12,8 +12,10 @@ service cloud.firestore {
 
     // 1. Coleção de Pedidos (orders)
     match /orders/{orderId} {
-      // Qualquer cliente pode ler (para rastrear pedidos) e criar novos pedidos
-      allow read, create: if true;
+      // Qualquer cliente pode criar e ler um pedido específico (para rastrear pedidos)
+      allow get, create: if true;
+      // Apenas o Administrador pode listar todos os pedidos
+      allow list: if isAdmin();
       // Apenas o Administrador (Emanoelcarmo00@gmail.com) pode atualizar o status ou excluir pedidos
       allow update, delete: if isAdmin();
     }
