@@ -35,7 +35,7 @@ import {
 } from './services/firebaseService';
 import { loadCategories, deriveCustomersFromOrders, loadSettings } from './utils/storage';
 import { STORE_INFO } from './data/mockData';
-import { MessageCircle, Clock, UserCheck } from 'lucide-react';
+import { MessageCircle, Clock } from 'lucide-react';
 
 const Instagram = ({ className }: { className?: string }) => (
   <svg
@@ -58,7 +58,6 @@ const Instagram = ({ className }: { className?: string }) => (
 
 export function App() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminAuth, setIsAdminAuth] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories] = useState<Category[]>(loadCategories);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
@@ -132,7 +131,6 @@ export function App() {
       setIsAdmin(false);
     } else {
       if (userProfile?.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
-        setIsAdminAuth(true);
         setIsAdmin(true);
       } else {
         setIsLoginModalOpen(true);
@@ -414,7 +412,6 @@ export function App() {
         onSuccess={(profile) => {
           setUserProfile(profile);
           if (profile.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
-            setIsAdminAuth(true);
             setIsAdmin(true);
           }
         }}
