@@ -8,7 +8,6 @@ import { DeliveryCalculatorModal } from './components/DeliveryCalculatorModal';
 import { OrderTrackerModal } from './components/OrderTrackerModal';
 import { CouponModal } from './components/CouponModal';
 import { LoginModal } from './components/LoginModal';
-import { AdminLoginModal } from './components/AdminLoginModal';
 import { FluidCursor } from './components/FluidCursor';
 import { FloatingCartBar } from './components/FloatingCartBar';
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -83,7 +82,6 @@ export function App() {
   const [isDeliveryCalculatorOpen, setIsDeliveryCalculatorOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isAdminPasswordModalOpen, setIsAdminPasswordModalOpen] = useState(false);
   const [trackerOrder, setTrackerOrder] = useState<Order | null>(null);
   const [settings, setSettings] = useState<StoreSettings>(loadSettings());
 
@@ -133,17 +131,13 @@ export function App() {
     if (isAdmin) {
       setIsAdmin(false);
     } else {
-      if (isAdminAuth) {
+      if (userProfile?.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
+        setIsAdminAuth(true);
         setIsAdmin(true);
       } else {
-        setIsAdminPasswordModalOpen(true);
+        setIsLoginModalOpen(true);
       }
     }
-  };
-
-  const handleAdminAuthSuccess = () => {
-    setIsAdminAuth(true);
-    setIsAdmin(true);
   };
 
   const handleAddToCart = (product: Product, quantity: number, options: CartItemOption) => {
@@ -266,28 +260,9 @@ export function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenCouponModal={() => setIsCouponModalOpen(true)}
+        userProfile={userProfile}
+        onOpenLoginModal={() => setIsLoginModalOpen(true)}
       />
-
-      {!isAdmin && (
-        <div className="max-w-6xl w-full mx-auto px-4 mt-3 flex justify-end">
-          {userProfile ? (
-            <button
-              onClick={() => setIsLoginModalOpen(true)}
-              className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Olá, {userProfile.name}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsLoginModalOpen(true)}
-              className="text-xs text-zinc-400 hover:text-white underline font-medium"
-            >
-              Entrar com Google (Opcional)
-            </button>
-          )}
-        </div>
-      )}
 
       {isAdmin ? (
         <AdminLayout
@@ -436,14 +411,14 @@ export function App() {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
-        onSuccess={(profile) => setUserProfile(profile)}
+        onSuccess={(profile) => {
+          setUserProfile(profile);
+          if (profile.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
+            setIsAdminAuth(true);
+            setIsAdmin(true);
+          }
+        }}
         userProfile={userProfile}
-      />
-
-      <AdminLoginModal
-        isOpen={isAdminPasswordModalOpen}
-        onClose={() => setIsAdminPasswordModalOpen(false)}
-        onSuccess={handleAdminAuthSuccess}
       />
 
       <FloatingCartBar

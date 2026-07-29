@@ -14,6 +14,8 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onOpenCouponModal: () => void;
+  userProfile: { email: string; name: string } | null;
+  onOpenLoginModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,6 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   onSearchChange,
   onOpenCouponModal,
+  userProfile,
+  onOpenLoginModal,
 }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [canInstallPWA, setCanInstallPWA] = useState(false);
@@ -98,26 +102,36 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Cupons</span>
             </button>
 
-            <button
-              onClick={onToggleAdmin}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs ${
-                isAdmin
-                  ? 'bg-orange-500 text-black border-orange-400 shadow-lg shadow-orange-500/20'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 hover:border-orange-500/50'
-              }`}
-            >
-              {isAdmin ? (
-                <>
-                  <Store className="w-3.5 h-3.5" />
-                  <span>Ver Cardápio</span>
-                </>
-              ) : (
-                <>
-                  <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Entrar</span>
-                </>
-              )}
-            </button>
+            {userProfile?.email.toLowerCase() === 'emanoelcarmo00@gmail.com' ? (
+              <button
+                onClick={onToggleAdmin}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs ${
+                  isAdmin
+                    ? 'bg-orange-500 text-black border-orange-400 shadow-lg shadow-orange-500/20'
+                    : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 hover:border-orange-500/50'
+                }`}
+              >
+                {isAdmin ? (
+                  <>
+                    <Store className="w-3.5 h-3.5" />
+                    <span>Ver Cardápio</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
+                    <span>Painel Admin</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={onOpenLoginModal}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 hover:border-orange-500/50"
+              >
+                <Store className="w-3.5 h-3.5 text-orange-400" />
+                <span>{userProfile ? 'Meu Perfil' : 'Entrar'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
