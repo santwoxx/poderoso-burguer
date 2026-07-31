@@ -33,7 +33,7 @@ import {
   subscribeSettings,
   saveSettingsDb,
 } from './services/firebaseService';
-import { loadCategories, deriveCustomersFromOrders, loadSettings } from './utils/storage';
+import { loadCategories, deriveCustomersFromOrders, loadSettings, loadProducts, loadNeighborhoods, loadOrders } from './utils/storage';
 import { STORE_INFO } from './data/mockData';
 import { MessageCircle, Clock } from 'lucide-react';
 
@@ -89,6 +89,14 @@ export function App() {
     const unsubOrders = subscribeOrders((liveOrders) => {
       setOrders(liveOrders);
       
+      setTrackerOrder((prev) => {
+        if (prev) {
+          const updated = liveOrders.find((o) => o.id === prev.id);
+          if (updated) return updated;
+        }
+        return prev;
+      });
+      
       const urlParams = new URLSearchParams(window.location.search);
       const orderIdParam = urlParams.get('order');
       if (orderIdParam) {
@@ -122,6 +130,29 @@ export function App() {
       unsubNeighborhoods();
       unsubSettings();
     };
+  }, []);
+
+  // Listen for cross-tab localStorage updates (fallback if Firebase is delayed/offline)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'poderoso_burguer_products') {
+        setProducts(loadProducts());
+      } else if (e.key === 'poderoso_burguer_neighborhoods') {
+        setNeighborhoods(loadNeighborhoods());
+      } else if (e.key === 'poderoso_burguer_orders') {
+        setOrders(loadOrders());
+      } else if (e.key === 'poderoso_burguer_settings') {
+        const newSettings = loadSettings();
+        setSettings(newSettings);
+        if (newSettings.theme === 'light') {
+          document.body.classList.add('light');
+        } else {
+          document.body.classList.remove('light');
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const customers = deriveCustomersFromOrders(orders);
