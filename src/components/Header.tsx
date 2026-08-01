@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Cupons</span>
             </button>
 
-            {userProfile?.email.toLowerCase() === 'emanoelcarmo00@gmail.com' ? (
+            {userProfile?.email && ['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(userProfile.email.toLowerCase()) ? (
               <button
                 onClick={onToggleAdmin}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs ${

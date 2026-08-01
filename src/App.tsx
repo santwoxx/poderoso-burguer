@@ -161,7 +161,10 @@ export function App() {
     if (isAdmin) {
       setIsAdmin(false);
     } else {
-      if (userProfile?.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
+      if (
+        userProfile?.email &&
+        ['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(userProfile.email.toLowerCase())
+      ) {
         setIsAdmin(true);
       } else {
         setIsLoginModalOpen(true);
@@ -442,7 +445,7 @@ export function App() {
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={(profile) => {
           setUserProfile(profile);
-          if (profile.email.toLowerCase() === 'emanoelcarmo00@gmail.com') {
+          if (['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(profile.email.toLowerCase())) {
             setIsAdmin(true);
           }
         }}

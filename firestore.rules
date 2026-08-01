@@ -7,7 +7,7 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null 
         && request.auth.token.email != null 
-        && request.auth.token.email.lower() == 'emanoelcarmo00@gmail.com';
+        && (request.auth.token.email.lower() == 'emanoelcarmo00@gmail.com' || request.auth.token.email.lower() == 'brisasofc@gmail.com');
     }
 
     // 1. Coleção de Pedidos (orders)
@@ -16,7 +16,7 @@ service cloud.firestore {
       allow get, create: if true;
       // Apenas o Administrador pode listar todos os pedidos
       allow list: if isAdmin();
-      // Apenas o Administrador (Emanoelcarmo00@gmail.com) pode atualizar o status ou excluir pedidos
+      // Apenas Administradores podem atualizar o status ou excluir pedidos
       allow update, delete: if isAdmin();
     }
 
