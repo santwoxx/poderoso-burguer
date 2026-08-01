@@ -8,6 +8,7 @@ interface CreateOrderModalProps {
   products: Product[];
   neighborhoods: Neighborhood[];
   onCreateOrder: (order: Order) => void;
+  initialOrder?: Order | null;
 }
 
 export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
@@ -16,20 +17,25 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   products,
   neighborhoods,
   onCreateOrder,
+  initialOrder,
 }) => {
   if (!isOpen) return null;
 
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerName, setCustomerName] = useState(initialOrder?.customerName || '');
+  const [customerPhone, setCustomerPhone] = useState(initialOrder?.customerPhone || '');
   const [selectedNeighborhoodId, setSelectedNeighborhoodId] = useState(
-    neighborhoods[0]?.id || ''
+    initialOrder
+      ? neighborhoods.find(n => n.name === initialOrder.address.neighborhood)?.id || ''
+      : neighborhoods[0]?.id || ''
   );
-  const [street] = useState('');
-  const [number] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PIX');
-  const [changeFor] = useState('');
+  const [street, setStreet] = useState(initialOrder?.address.street !== 'Venda Balcão / Retirada' ? (initialOrder?.address.street || '') : '');
+  const [number, setNumber] = useState(initialOrder?.address.number !== 'S/N' ? (initialOrder?.address.number || '') : '');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initialOrder?.paymentMethod || 'PIX');
+  const [changeFor, setChangeFor] = useState(initialOrder?.changeFor || '');
+  
+  const [discount, setDiscount] = useState<number>(initialOrder?.discount || 0);
 
-  const [manualItems, setManualItems] = useState<CartItem[]>([]);
+  const [manualItems, setManualItems] = useState<CartItem[]>(initialOrder?.items || []);
 
   const [selectedProdId, setSelectedProdId] = useState(products[0]?.id || '');
   const [qty, setQty] = useState(1);
@@ -72,27 +78,29 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
 
     const subtotal = manualItems.reduce((s, i) => s + i.totalPrice, 0);
     const deliveryFee = selectedNeighborhood ? selectedNeighborhood.deliveryFee : 0;
-    const total = subtotal + deliveryFee;
+    const total = Math.max(0, subtotal + deliveryFee - discount);
 
     const newOrder: Order = {
-      id: `#PB-${Math.floor(1000 + Math.random() * 9000)}`,
-      createdAt: new Date().toISOString(),
+      id: initialOrder ? initialOrder.id : `#PB-${Math.floor(1000 + Math.random() * 9000)}`,
+      createdAt: initialOrder ? initialOrder.createdAt : new Date().toISOString(),
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       address: {
-        street: street.trim() || 'Venda Balcão / Retirada',
-        number: number.trim() || 'S/N',
-        neighborhood: selectedNeighborhood?.name || 'Centro',
+        street: street.trim() || (initialOrder ? initialOrder.address.street : 'Venda Balcão / Retirada'),
+        number: number.trim() || (initialOrder ? initialOrder.address.number : 'S/N'),
+        neighborhood: selectedNeighborhood?.name || (initialOrder ? initialOrder.address.neighborhood : 'Centro'),
+        complement: initialOrder?.address.complement,
+        reference: initialOrder?.address.reference,
       },
       paymentMethod,
       changeFor: paymentMethod === 'CASH' ? changeFor : undefined,
       items: manualItems,
       subtotal,
       deliveryFee,
-      discount: 0,
+      discount,
       total,
-      status: 'CONFIRMED',
-      statusHistory: [
+      status: initialOrder ? initialOrder.status : 'CONFIRMED',
+      statusHistory: initialOrder ? initialOrder.statusHistory : [
         { status: 'ANALYSIS', timestamp: new Date().toISOString() },
         { status: 'CONFIRMED', timestamp: new Date().toISOString() },
       ],
@@ -104,7 +112,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
 
   const subtotal = manualItems.reduce((s, i) => s + i.totalPrice, 0);
   const deliveryFee = selectedNeighborhood ? selectedNeighborhood.deliveryFee : 0;
-  const total = subtotal + deliveryFee;
+  const total = Math.max(0, subtotal + deliveryFee - discount);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-backdrop overflow-y-auto">
@@ -115,7 +123,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
           <h3 className="font-extrabold text-white text-base flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-orange-500" />
-            Lançar Novo Pedido (Balcão / Telefone)
+            {initialOrder ? 'Editar Pedido' : 'Lançar Novo Pedido (Balcão / Telefone)'}
           </h3>
           <button type="button" onClick={onClose} className="text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
@@ -233,9 +241,30 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#18181d] border border-zinc-800 p-4 rounded-2xl flex justify-between items-center text-xs">
-          <span className="font-bold text-zinc-300">Total do Pedido:</span>
-          <span className="text-lg font-black text-orange-400">R$ {total.toFixed(2).replace('.', ',')}</span>
+        <div className="bg-[#18181d] border border-zinc-800 p-4 rounded-2xl space-y-2 text-xs">
+          <div className="flex justify-between text-zinc-400">
+            <span>Subtotal</span>
+            <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div className="flex justify-between text-zinc-400">
+            <span>Taxa de Entrega</span>
+            <span>+R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div className="flex justify-between items-center text-zinc-300">
+            <span className="font-bold">Desconto (R$)</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={discount || ''}
+              onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+              className="w-24 bg-zinc-900 border border-zinc-700 text-white p-1.5 rounded-lg text-xs text-right focus:outline-none"
+            />
+          </div>
+          <div className="flex justify-between items-center pt-2 border-t border-zinc-800">
+            <span className="font-bold text-zinc-300">Total do Pedido:</span>
+            <span className="text-lg font-black text-orange-400">R$ {total.toFixed(2).replace('.', ',')}</span>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800">
@@ -250,7 +279,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
             type="submit"
             className="bg-emerald-500 hover:bg-emerald-400 text-black px-5 py-2.5 rounded-xl text-xs font-black"
           >
-            CONFIRMAR E SALVAR PEDIDO
+            {initialOrder ? 'SALVAR ALTERAÇÕES' : 'CONFIRMAR E SALVAR PEDIDO'}
           </button>
         </div>
       </form>

@@ -15,6 +15,7 @@ interface AdminLayoutProps {
   settings: StoreSettings;
   onUpdateOrderStatus: (orderId: string, status: OrderStatus) => void;
   onCreateOrder: (order: Order) => void;
+  onUpdateOrder: (order: Order) => void;
   onDeleteOrder: (orderId: string) => void;
   onSaveNeighborhoods: (neighborhoods: Neighborhood[]) => void;
   onSaveProducts: (products: Product[]) => void;
@@ -31,6 +32,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   settings,
   onUpdateOrderStatus,
   onCreateOrder,
+  onUpdateOrder,
   onDeleteOrder,
   onSaveNeighborhoods,
   onSaveProducts,
@@ -249,6 +251,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           neighborhoods={neighborhoods}
           onUpdateStatus={onUpdateOrderStatus}
           onCreateOrder={onCreateOrder}
+          onUpdateOrder={onUpdateOrder}
           onDeleteOrder={onDeleteOrder}
         />
       )}

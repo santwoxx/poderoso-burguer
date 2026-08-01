@@ -107,7 +107,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     };
 
     const whatsappLink = generateCustomerOrderWhatsAppLink(newOrder);
-    window.open(whatsappLink, '_blank');
+    const a = document.createElement('a');
+    a.href = whatsappLink;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
     onOrderPlaced(newOrder);
     onClearCart();

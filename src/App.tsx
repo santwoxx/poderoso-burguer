@@ -229,6 +229,11 @@ export function App() {
     saveOrderDb(newOrder);
   };
 
+  const handleUpdateOrder = (updatedOrder: Order) => {
+    setOrders((prev) => prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o)));
+    saveOrderDb(updatedOrder);
+  };
+
   const handleUpdateOrderStatus = (orderId: string, status: OrderStatus) => {
     setOrders((prev) =>
       prev.map((o) => {
@@ -306,6 +311,7 @@ export function App() {
           settings={settings}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onCreateOrder={handleCreateManualOrder}
+          onUpdateOrder={handleUpdateOrder}
           onDeleteOrder={handleDeleteOrder}
           onSaveNeighborhoods={handleSaveNeighborhoods}
           onSaveProducts={handleSaveProducts}

@@ -10,6 +10,7 @@ interface OrdersManagerProps {
   neighborhoods: Neighborhood[];
   onUpdateStatus: (orderId: string, status: OrderStatus) => void;
   onCreateOrder: (order: Order) => void;
+  onUpdateOrder: (order: Order) => void;
   onDeleteOrder: (orderId: string) => void;
 }
 
@@ -19,11 +20,13 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({
   neighborhoods,
   onUpdateStatus,
   onCreateOrder,
+  onUpdateOrder,
   onDeleteOrder,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
   const [activeModalOrder, setActiveModalOrder] = useState<Order | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
   // Optional status notification modal state
   const [pendingNotifyOrder, setPendingNotifyOrder] = useState<{ order: Order; newStatus: OrderStatus } | null>(null);
@@ -67,7 +70,10 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({
         </div>
 
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => {
+            setEditingOrder(null);
+            setIsCreateModalOpen(true);
+          }}
           className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-orange-600/30 flex items-center gap-2 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
@@ -135,6 +141,18 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({
                         <span>{statusInfo.icon}</span>
                         <span>{statusInfo.label}</span>
                       </span>
+                      <button
+                        onClick={() => {
+                          setEditingOrder(order);
+                          setIsCreateModalOpen(true);
+                        }}
+                        className="p-1.5 bg-zinc-900 hover:bg-orange-500/20 text-zinc-500 hover:text-orange-400 rounded-lg transition-colors"
+                        title="Editar Pedido"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
                       <button
                         onClick={() => handleDelete(order.id)}
                         className="p-1.5 bg-zinc-900 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 rounded-lg transition-colors"
@@ -350,13 +368,25 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({
         </div>
       )}
 
-      <CreateOrderModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        products={products}
-        neighborhoods={neighborhoods}
-        onCreateOrder={onCreateOrder}
-      />
+      {isCreateModalOpen && (
+        <CreateOrderModal
+          isOpen={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setEditingOrder(null);
+          }}
+          products={products}
+          neighborhoods={neighborhoods}
+          initialOrder={editingOrder}
+          onCreateOrder={(order) => {
+            if (editingOrder) {
+              onUpdateOrder(order);
+            } else {
+              onCreateOrder(order);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
