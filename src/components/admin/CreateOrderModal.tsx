@@ -28,10 +28,10 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
       ? neighborhoods.find(n => n.name === initialOrder.address.neighborhood)?.id || ''
       : neighborhoods[0]?.id || ''
   );
-  const [street, setStreet] = useState(initialOrder?.address.street !== 'Venda Balcão / Retirada' ? (initialOrder?.address.street || '') : '');
-  const [number, setNumber] = useState(initialOrder?.address.number !== 'S/N' ? (initialOrder?.address.number || '') : '');
+  const [street] = useState(initialOrder?.address.street !== 'Venda Balcão / Retirada' ? (initialOrder?.address.street || '') : '');
+  const [number] = useState(initialOrder?.address.number !== 'S/N' ? (initialOrder?.address.number || '') : '');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initialOrder?.paymentMethod || 'PIX');
-  const [changeFor, setChangeFor] = useState(initialOrder?.changeFor || '');
+  const [changeFor] = useState(initialOrder?.changeFor || '');
   
   const [discount, setDiscount] = useState<number>(initialOrder?.discount || 0);
 
