@@ -41,16 +41,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         phone,
       };
       onSuccess(profile);
-    } catch (e) {
+    } catch (e: any) {
       console.warn('Google Auth popup notice:', e);
-      // Demo fallback Google profile
-      const profile: UserProfile = {
-        email: 'cliente.google@gmail.com',
-        name: 'Cliente Google',
-        cpf,
-        phone,
-      };
-      onSuccess(profile);
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        alert('Erro ao fazer login com o Google: ' + (e.message || 'Erro desconhecido'));
+      }
     } finally {
       setLoading(false);
     }

@@ -17,6 +17,9 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 export const analytics = typeof window !== 'undefined'
   ? isSupported().then((yes) => (yes ? getAnalytics(app) : null)).catch(() => null)
