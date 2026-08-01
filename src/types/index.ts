@@ -57,7 +57,8 @@ export interface CustomerAddress {
 export type PaymentMethod = 'PIX' | 'CARD' | 'CASH';
 
 export interface Order {
-  id: string; // e.g. #PB-1042
+  id: string; // unique long UUID
+  displayId?: string; // e.g. #PB-1042
   createdAt: string; // ISO string
   customerName: string;
   customerPhone: string;

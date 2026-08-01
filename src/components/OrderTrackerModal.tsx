@@ -80,7 +80,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             Acompanhamento ao Vivo
           </span>
           <h2 className="text-xl sm:text-2xl font-black text-white font-display">
-            Pedido {currentOrder.id}
+            Pedido {currentOrder.displayId || currentOrder.id}
           </h2>
           <p className="text-zinc-400 text-xs font-medium">
             Atualização em tempo real do seu pedido

@@ -10,10 +10,22 @@ service cloud.firestore {
         && (request.auth.token.email.lower() == 'emanoelcarmo00@gmail.com' || request.auth.token.email.lower() == 'brisasofc@gmail.com');
     }
 
+    // Função de validação básica para prevenir spam malicioso no banco de dados
+    function isValidOrder() {
+      let incoming = request.resource.data;
+      return incoming.keys().hasAll(['customerName', 'customerPhone', 'total', 'status', 'items'])
+        && incoming.total >= 0
+        && incoming.status == 'ANALYSIS'
+        && incoming.customerName is string
+        && incoming.customerName.size() > 0;
+    }
+
     // 1. Coleção de Pedidos (orders)
     match /orders/{orderId} {
-      // Qualquer cliente pode criar e ler um pedido específico (para rastrear pedidos)
-      allow get, create: if true;
+      // Qualquer cliente pode ler um pedido específico (ID UUID inadvinhável)
+      allow get: if true;
+      // Valida o pedido antes de permitir a criação
+      allow create: if isValidOrder() || isAdmin();
       // Apenas o Administrador pode listar todos os pedidos
       allow list: if isAdmin();
       // Apenas Administradores podem atualizar o status ou excluir pedidos

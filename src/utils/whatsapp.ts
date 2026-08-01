@@ -12,7 +12,7 @@ export function formatPhoneForWhatsapp(phone: string): string {
 export function generateCustomerOrderWhatsAppLink(order: Order): string {
   const storePhone = STORE_INFO.whatsapp;
   
-  let msg = `*🍔 PEDIDO #${order.id} - ${STORE_INFO.name.toUpperCase()}*\n\n`;
+  let msg = `*🍔 PEDIDO ${order.displayId || order.id} - ${STORE_INFO.name.toUpperCase()}*\n\n`;
   msg += `👤 *Cliente:* ${order.customerName}\n`;
   msg += `📞 *Telefone:* ${order.customerPhone}\n\n`;
 
@@ -80,7 +80,7 @@ export function generateAdminStatusWhatsAppLink(order: Order, newStatus: OrderSt
   
   let msg = `*${STORE_INFO.name.toUpperCase()} - ATUALIZAÇÃO DE PEDIDO* 🍔\n\n`;
   msg += `Olá, *${order.customerName}*!\n\n`;
-  msg += `O status do seu pedido *#${order.id}* foi atualizado:\n\n`;
+  msg += `O status do seu pedido *${order.displayId || order.id}* foi atualizado:\n\n`;
 
   switch (newStatus) {
     case 'ANALYSIS':

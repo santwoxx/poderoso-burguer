@@ -79,9 +79,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       return;
     }
 
-    const orderId = `#PB-${Math.floor(1000 + Math.random() * 9000)}`;
+    const displayId = `#PB-${Math.floor(1000 + Math.random() * 9000)}`;
+    const orderId = crypto.randomUUID();
     const newOrder: Order = {
       id: orderId,
+      displayId: displayId,
       createdAt: new Date().toISOString(),
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
