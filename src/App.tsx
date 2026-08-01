@@ -10,7 +10,6 @@ import { CouponModal } from './components/CouponModal';
 import { LoginModal } from './components/LoginModal';
 import { FluidCursor } from './components/FluidCursor';
 import { FloatingCartBar } from './components/FloatingCartBar';
-import { AdminLayout } from './components/admin/AdminLayout';
 import type {
   Product,
   Category,
@@ -18,22 +17,15 @@ import type {
   Order,
   CartItem,
   CartItemOption,
-  OrderStatus,
-  StoreSettings,
 } from './types';
 import {
   subscribeOrders,
   subscribeProducts,
   subscribeNeighborhoods,
   saveOrderDb,
-  updateOrderStatusDb,
-  deleteOrderDb,
-  saveProductsDb,
-  saveNeighborhoodsDb,
   subscribeSettings,
-  saveSettingsDb,
 } from './services/firebaseService';
-import { loadCategories, deriveCustomersFromOrders, loadSettings, loadProducts, loadNeighborhoods, loadOrders } from './utils/storage';
+import { loadCategories, loadSettings, loadProducts, loadNeighborhoods } from './utils/storage';
 import { STORE_INFO } from './data/mockData';
 import { MessageCircle, Clock } from 'lucide-react';
 
@@ -57,11 +49,9 @@ const Instagram = ({ className }: { className?: string }) => (
 );
 
 export function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories] = useState<Category[]>(loadCategories);
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [userProfile, setUserProfile] = useState<{
     email: string;
     name: string;
@@ -82,12 +72,11 @@ export function App() {
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [trackerOrder, setTrackerOrder] = useState<Order | null>(null);
-  const [settings, setSettings] = useState<StoreSettings>(loadSettings());
+
 
   // Subscribe to Firestore Realtime updates
   useEffect(() => {
     const unsubOrders = subscribeOrders((liveOrders) => {
-      setOrders(liveOrders);
       
       setTrackerOrder((prev) => {
         if (prev) {
@@ -116,7 +105,6 @@ export function App() {
       }
     });
     const unsubSettings = subscribeSettings((liveSettings) => {
-      setSettings(liveSettings);
       if (liveSettings.theme === 'light') {
         document.body.classList.add('light');
       } else {
@@ -139,11 +127,8 @@ export function App() {
         setProducts(loadProducts());
       } else if (e.key === 'poderoso_burguer_neighborhoods') {
         setNeighborhoods(loadNeighborhoods());
-      } else if (e.key === 'poderoso_burguer_orders') {
-        setOrders(loadOrders());
       } else if (e.key === 'poderoso_burguer_settings') {
         const newSettings = loadSettings();
-        setSettings(newSettings);
         if (newSettings.theme === 'light') {
           document.body.classList.add('light');
         } else {
@@ -155,22 +140,7 @@ export function App() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const customers = deriveCustomersFromOrders(orders);
 
-  const handleToggleAdminClick = () => {
-    if (isAdmin) {
-      setIsAdmin(false);
-    } else {
-      if (
-        userProfile?.email &&
-        ['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(userProfile.email.toLowerCase())
-      ) {
-        setIsAdmin(true);
-      } else {
-        setIsLoginModalOpen(true);
-      }
-    }
-  };
 
   const handleAddToCart = (product: Product, quantity: number, options: CartItemOption) => {
     const addonsTotal = options.addons ? options.addons.reduce((sum, a) => sum + a.price, 0) : 0;
@@ -219,51 +189,8 @@ export function App() {
   const handleClearCart = () => setCart([]);
 
   const handleOrderPlaced = (newOrder: Order) => {
-    setOrders((prev) => [newOrder, ...prev]);
     saveOrderDb(newOrder);
     setTrackerOrder(newOrder);
-  };
-
-  const handleCreateManualOrder = (newOrder: Order) => {
-    setOrders((prev) => [newOrder, ...prev]);
-    saveOrderDb(newOrder);
-  };
-
-  const handleUpdateOrder = (updatedOrder: Order) => {
-    setOrders((prev) => prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o)));
-    saveOrderDb(updatedOrder);
-  };
-
-  const handleUpdateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => {
-        if (o.id === orderId) {
-          const history = o.statusHistory || [];
-          return {
-            ...o,
-            status,
-            statusHistory: [...history, { status, timestamp: new Date().toISOString() }],
-          };
-        }
-        return o;
-      })
-    );
-    updateOrderStatusDb(orderId, status);
-  };
-
-  const handleDeleteOrder = (orderId: string) => {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId));
-    deleteOrderDb(orderId);
-  };
-
-  const handleSaveNeighborhoods = (newNeighborhoods: Neighborhood[]) => {
-    setNeighborhoods(newNeighborhoods);
-    saveNeighborhoodsDb(newNeighborhoods);
-  };
-
-  const handleSaveProducts = (newProducts: Product[]) => {
-    setProducts(newProducts);
-    saveProductsDb(newProducts);
   };
 
   const filteredProducts = products.filter((p) => {
@@ -292,8 +219,6 @@ export function App() {
         selectedNeighborhood={selectedNeighborhood}
         onOpenDeliveryCalculator={() => setIsDeliveryCalculatorOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
-        isAdmin={isAdmin}
-        onToggleAdmin={handleToggleAdminClick}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenCouponModal={() => setIsCouponModalOpen(true)}
@@ -301,32 +226,6 @@ export function App() {
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
       />
 
-      {isAdmin ? (
-        <AdminLayout
-          orders={orders}
-          neighborhoods={neighborhoods}
-          customers={customers}
-          products={products}
-          categories={categories}
-          settings={settings}
-          onUpdateOrderStatus={handleUpdateOrderStatus}
-          onCreateOrder={handleCreateManualOrder}
-          onUpdateOrder={handleUpdateOrder}
-          onDeleteOrder={handleDeleteOrder}
-          onSaveNeighborhoods={handleSaveNeighborhoods}
-          onSaveProducts={handleSaveProducts}
-          onUpdateSettings={(newSettings) => {
-            setSettings(newSettings);
-            if (newSettings.theme === 'light') {
-              document.body.classList.add('light');
-            } else {
-              document.body.classList.remove('light');
-            }
-            saveSettingsDb(newSettings);
-          }}
-          onCloseAdmin={() => setIsAdmin(false)}
-        />
-      ) : (
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 mt-4 space-y-8">
           <CategoryTabs
             categories={categories}
@@ -385,7 +284,6 @@ export function App() {
             </div>
           )}
         </main>
-      )}
 
       {(STORE_INFO.instagramUrl || STORE_INFO.instagram) && (
         <a
@@ -451,9 +349,6 @@ export function App() {
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={(profile) => {
           setUserProfile(profile);
-          if (['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(profile.email.toLowerCase())) {
-            setIsAdmin(true);
-          }
         }}
         userProfile={userProfile}
       />

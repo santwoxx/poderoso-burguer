@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, MapPin, Ticket, ShieldCheck, Store, Search, Download } from 'lucide-react';
+import { ShoppingBag, MapPin, Ticket, Store, Search, Download } from 'lucide-react';
 import { STORE_INFO } from '../data/mockData';
 import type { Neighborhood } from '../types';
 
@@ -9,8 +9,6 @@ interface HeaderProps {
   selectedNeighborhood: Neighborhood | null;
   onOpenDeliveryCalculator: () => void;
   onOpenCart: () => void;
-  isAdmin: boolean;
-  onToggleAdmin: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onOpenCouponModal: () => void;
@@ -24,8 +22,6 @@ export const Header: React.FC<HeaderProps> = ({
   selectedNeighborhood,
   onOpenDeliveryCalculator,
   onOpenCart,
-  isAdmin,
-  onToggleAdmin,
   searchQuery,
   onSearchChange,
   onOpenCouponModal,
@@ -102,28 +98,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Cupons</span>
             </button>
 
-            {userProfile?.email && ['emanoelcarmo00@gmail.com', 'brisasofc@gmail.com'].includes(userProfile.email.toLowerCase()) ? (
-              <button
-                onClick={onToggleAdmin}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs ${
-                  isAdmin
-                    ? 'bg-orange-500 text-black border-orange-400 shadow-lg shadow-orange-500/20'
-                    : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 hover:border-orange-500/50'
-                }`}
-              >
-                {isAdmin ? (
-                  <>
-                    <Store className="w-3.5 h-3.5" />
-                    <span>Ver Cardápio</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
-                    <span>Painel Admin</span>
-                  </>
-                )}
-              </button>
-            ) : (
               <button
                 onClick={onOpenLoginModal}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all font-bold text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 hover:border-orange-500/50"
@@ -131,19 +105,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Store className="w-3.5 h-3.5 text-orange-400" />
                 <span>{userProfile ? 'Meu Perfil' : 'Entrar'}</span>
               </button>
-            )}
           </div>
         </div>
       </div>
 
-      {!isAdmin && (
-        <>
-          <div className="relative h-48 sm:h-60 w-full overflow-hidden">
-            <img
-              src={STORE_INFO.bannerUrl}
-              alt="Banner Poderoso Burguer"
-              className="w-full h-full object-cover filter brightness-[0.55] contrast-125 scale-105"
-            />
+      <div className="relative h-48 sm:h-60 w-full overflow-hidden">
+        <img
+          src={STORE_INFO.bannerUrl}
+          alt="Banner Poderoso Burguer"
+          className="w-full h-full object-cover filter brightness-[0.55] contrast-125 scale-105"
+        />
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-black/50" />
           </div>
 
@@ -194,8 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
           </div>
-        </>
-      )}
+
     </header>
   );
 };
