@@ -59,6 +59,30 @@ export function subscribeOrders(onUpdate: (orders: Order[]) => void) {
 }
 
 /**
+ * Subscribe to a specific Order by ID (for customers)
+ */
+export function subscribeToOrderById(orderId: string, onUpdate: (order: Order | null) => void) {
+  try {
+    const docId = orderId.replace('#', 'PB_');
+    return onSnapshot(
+      doc(db, COLLECTIONS.ORDERS, docId),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          onUpdate(docSnap.data() as Order);
+        } else {
+          onUpdate(null);
+        }
+      },
+      (error) => {
+        console.warn('Firestore single order error:', error);
+      }
+    );
+  } catch (e) {
+    return () => {};
+  }
+}
+
+/**
  * Subscribe to Products in Realtime
  */
 export function subscribeProducts(onUpdate: (products: Product[]) => void) {

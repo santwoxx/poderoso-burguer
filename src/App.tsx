@@ -20,6 +20,7 @@ import type {
 } from './types';
 import {
   subscribeOrders,
+  subscribeToOrderById,
   subscribeProducts,
   subscribeNeighborhoods,
   saveOrderDb,
@@ -76,25 +77,9 @@ export function App() {
 
   // Subscribe to Firestore Realtime updates
   useEffect(() => {
+    // Keep this for local storage fallback when offline/unauthorized
     const unsubOrders = subscribeOrders((liveOrders) => {
-      
-      setTrackerOrder((prev) => {
-        if (prev) {
-          const updated = liveOrders.find((o) => o.id === prev.id);
-          if (updated) return updated;
-        }
-        return prev;
-      });
-      
-      const urlParams = new URLSearchParams(window.location.search);
-      const orderIdParam = urlParams.get('order');
-      if (orderIdParam) {
-        const found = liveOrders.find(o => o.id === `#${orderIdParam}` || o.id === orderIdParam);
-        if (found) {
-          setTrackerOrder(found);
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
+      // (tracking logic moved to specific order subscription below)
     });
     const unsubProducts = subscribeProducts((liveProds) => setProducts(liveProds));
     const unsubNeighborhoods = subscribeNeighborhoods((liveNeighs) => {
@@ -139,6 +124,28 @@ export function App() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Track specific order
+  useEffect(() => {
+    let unsub = () => {};
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderIdParam = urlParams.get('order');
+    const targetId = trackerOrder?.id || orderIdParam;
+
+    if (targetId) {
+      unsub = subscribeToOrderById(targetId, (order) => {
+        if (order) {
+          setTrackerOrder(order);
+          if (orderIdParam) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+      });
+    }
+
+    return () => unsub();
+  }, [trackerOrder?.id]);
 
 
 
