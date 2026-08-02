@@ -11,6 +11,7 @@ export const STORE_INFO = {
   minOrder: 15.0,
   bannerUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1400&q=80',
   logoUrl: '/logo.png',
+  pixKey: '73999467595',
 };
 
 export const INITIAL_CATEGORIES: Category[] = [

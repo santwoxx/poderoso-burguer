@@ -52,7 +52,7 @@ export function generateCustomerOrderWhatsAppLink(order: Order): string {
   msg += `👉 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*\n\n`;
 
   msg += `💳 *Forma de Pagamento:* ${
-    order.paymentMethod === 'PIX' ? 'Pix ⚡' :
+    order.paymentMethod === 'PIX' ? `Pix ⚡\n🔑 *Chave PIX (Celular):* ${STORE_INFO.pixKey || '73999467595'}` :
     order.paymentMethod === 'CARD' ? 'Cartão 💳' :
     `Dinheiro 💵 ${order.changeFor ? `(Troco para R$ ${order.changeFor})` : '(Sem troco)'}`
   }\n\n`;
