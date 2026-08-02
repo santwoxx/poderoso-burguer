@@ -78,7 +78,7 @@ export function App() {
   // Subscribe to Firestore Realtime updates
   useEffect(() => {
     // Keep this for local storage fallback when offline/unauthorized
-    const unsubOrders = subscribeOrders((liveOrders) => {
+    const unsubOrders = subscribeOrders(() => {
       // (tracking logic moved to specific order subscription below)
     });
     const unsubProducts = subscribeProducts((liveProds) => setProducts(liveProds));

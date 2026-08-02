@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, ShoppingBag, MapPin, CreditCard, DollarSign, QrCode, ArrowRight, Tag } from 'lucide-react';
+import { X, Trash2, ShoppingBag, MapPin, CreditCard, DollarSign, QrCode, ArrowRight } from 'lucide-react';
 import type { CartItem, Neighborhood, PaymentMethod, Order } from '../types';
 import { generateCustomerOrderWhatsAppLink } from '../utils/whatsapp';
 
