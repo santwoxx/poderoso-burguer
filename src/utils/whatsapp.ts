@@ -103,7 +103,29 @@ export function generateAdminStatusWhatsAppLink(order: Order, newStatus: OrderSt
       break;
   }
 
-  msg += `\n\n*Resumo:* ${order.items.length} item(ns) • Total: R$ ${order.total.toFixed(2).replace('.', ',')}`;
+  msg += `\n\n*🛒 Itens do Pedido:*\n`;
+  order.items.forEach((item, index) => {
+    msg += `*${index + 1}. ${item.quantity}x ${item.product.name}* - R$ ${(item.totalPrice).toFixed(2).replace('.', ',')}\n`;
+    if (item.options?.meatPoint) {
+      msg += `   🥩 Ponto: _${item.options.meatPoint}_\n`;
+    }
+    if (item.options?.comboSelections) {
+      msg += `   🍔 Hambúrguer 1: _${item.options.comboSelections.burger1}_\n`;
+      msg += `   🍔 Hambúrguer 2: _${item.options.comboSelections.burger2}_\n`;
+      msg += `   🍟 Acompanhamento: _${item.options.comboSelections.side}_\n`;
+    }
+    if (item.options?.addons && item.options.addons.length > 0) {
+      msg += `   🧀 Adicionais:\n`;
+      item.options.addons.forEach(add => {
+        msg += `      + ${add.name} (+R$ ${add.price.toFixed(2).replace('.', ',')})\n`;
+      });
+    }
+    if (item.options?.observation) {
+      msg += `   📝 Obs: _${item.options.observation}_\n`;
+    }
+  });
+
+  msg += `\n*Resumo:* ${order.items.length} item(ns) • Total Geral: R$ ${order.total.toFixed(2).replace('.', ',')}`;
 
   const encodedMsg = encodeURIComponent(msg);
   return `https://wa.me/${formattedPhone}?text=${encodedMsg}`;
