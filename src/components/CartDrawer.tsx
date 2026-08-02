@@ -38,23 +38,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [reference, setReference] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PIX');
   const [changeFor, setChangeFor] = useState('');
-  const [coupon, setCoupon] = useState('');
-  const [discount, setDiscount] = useState(0);
-  const [couponApplied, setCouponApplied] = useState(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
   const deliveryFee = selectedNeighborhood ? selectedNeighborhood.deliveryFee : 0;
-  const total = Math.max(0, subtotal + deliveryFee - discount);
-
-  const applyCoupon = () => {
-    if (coupon.trim().toUpperCase() === 'PODEROSO10') {
-      const disc = subtotal * 0.1;
-      setDiscount(disc);
-      setCouponApplied(true);
-    } else {
-      alert('Cupom inválido! Tente PODEROSO10 para 10% de desconto.');
-    }
-  };
+  const total = subtotal + deliveryFee;
 
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +86,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       items,
       subtotal,
       deliveryFee,
-      discount,
-      couponCode: couponApplied ? 'PODEROSO10' : undefined,
+      discount: 0,
       total,
       status: 'ANALYSIS',
       statusHistory: [
@@ -364,28 +350,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   />
                 )}
               </div>
-
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Possui cupom? Ex: PODEROSO10"
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    disabled={couponApplied}
-                    className="w-full bg-[#18181d] border border-zinc-800 text-zinc-200 uppercase placeholder-zinc-500 pl-8 pr-3 py-2 rounded-xl text-xs focus:border-orange-500 focus:outline-none disabled:opacity-50"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={applyCoupon}
-                  disabled={couponApplied || !coupon.trim()}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
-                >
-                  {couponApplied ? 'Aplicado!' : 'Aplicar'}
-                </button>
-              </div>
             </form>
           )}
         </div>
@@ -403,12 +367,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   +R$ {deliveryFee.toFixed(2).replace('.', ',')}
                 </span>
               </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-emerald-400 font-medium">
-                  <span>Desconto (PODEROSO10)</span>
-                  <span>-R$ {discount.toFixed(2).replace('.', ',')}</span>
-                </div>
-              )}
               <div className="flex justify-between text-white font-black text-sm pt-2 border-t border-zinc-800">
                 <span>Total a Pagar</span>
                 <span className="text-orange-400 text-base">

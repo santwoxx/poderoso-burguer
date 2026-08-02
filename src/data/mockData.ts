@@ -14,9 +14,9 @@ export const STORE_INFO = {
 };
 
 export const INITIAL_CATEGORIES: Category[] = [
+  { id: 'burgers-artesanais', name: 'Burgers Artesanais' },
   { id: 'combo-casal', name: 'Combo Box Casal' },
   { id: 'combos-individuais', name: 'Combos Individuais' },
-  { id: 'burgers-artesanais', name: 'Burgers Artesanais' },
   { id: 'acai', name: 'Açaí' },
   { id: 'bebidas', name: 'Bebidas' },
   { id: 'sobremesas', name: 'Sobremesas' },
