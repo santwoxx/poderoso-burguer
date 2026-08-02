@@ -43,9 +43,7 @@ export function generateCustomerOrderWhatsAppLink(order: Order): string {
   msg += `\n💵 *RESUMO DE VALORES:*\n`;
   msg += `• Subtotal: R$ ${order.subtotal.toFixed(2).replace('.', ',')}\n`;
   msg += `• Taxa de Entrega (${order.address.neighborhood}): R$ ${order.deliveryFee.toFixed(2).replace('.', ',')}\n`;
-  if (order.discount > 0) {
-    msg += `• Desconto: -R$ ${order.discount.toFixed(2).replace('.', ',')}\n`;
-  }
+
   msg += `👉 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*\n\n`;
 
   msg += `💳 *Forma de Pagamento:* ${
