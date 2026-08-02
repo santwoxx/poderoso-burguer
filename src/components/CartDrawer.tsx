@@ -163,6 +163,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     {item.options?.meatPoint && (
                       <p className="text-[10px] text-orange-400">🥩 {item.options.meatPoint}</p>
                     )}
+                    {item.options?.comboSelections && (
+                      <div className="text-[10px] text-zinc-300 mt-0.5 space-y-0.5">
+                        <p>🍔 {item.options.comboSelections.burger1}</p>
+                        <p>🍔 {item.options.comboSelections.burger2}</p>
+                        <p>🍟 {item.options.comboSelections.side}</p>
+                      </div>
+                    )}
                     {item.options?.addons && item.options.addons.length > 0 && (
                       <p className="text-[10px] text-zinc-400 truncate">
                         + {item.options.addons.map((a) => a.name).join(', ')}

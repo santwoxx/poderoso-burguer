@@ -17,6 +17,7 @@ export interface Product {
   isAvailable: boolean;
   requiresMeatPoint?: boolean;
   availableAddons?: ProductAddon[];
+  isCustomCombo?: boolean;
 }
 
 export interface Category {
@@ -36,6 +37,11 @@ export interface CartItemOption {
   meatPoint?: string;
   addons?: ProductAddon[];
   observation?: string;
+  comboSelections?: {
+    burger1: string;
+    burger2: string;
+    side: string;
+  };
 }
 
 export interface CartItem {

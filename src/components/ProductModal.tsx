@@ -4,6 +4,7 @@ import type { Product, ProductAddon, CartItemOption } from '../types';
 
 interface ProductModalProps {
   product: Product | null;
+  products?: Product[];
   onClose: () => void;
   onAddToCart: (product: Product, quantity: number, options: CartItemOption) => void;
 }
@@ -12,6 +13,7 @@ const MEAT_POINTS = ['Mal passada (Suculenta)', 'Ao ponto (Recomendado 🔥)', '
 
 export const ProductModal: React.FC<ProductModalProps> = ({
   product,
+  products = [],
   onClose,
   onAddToCart,
 }) => {
@@ -23,12 +25,22 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   );
   const [selectedAddons, setSelectedAddons] = useState<ProductAddon[]>([]);
   const [observation, setObservation] = useState('');
+  
+  const [comboBurger1, setComboBurger1] = useState('');
+  const [comboBurger2, setComboBurger2] = useState('');
+  const [comboSide, setComboSide] = useState('');
+
+  const availableBurgers = products.filter(p => p.category === 'burgers-artesanais');
+  const COMBO_SIDES = ['Anéis de Cebola Crocantes', 'Batata Frita Sequinha', 'Batata Frita com Cheddar e Bacon'];
 
   useEffect(() => {
     setQuantity(1);
     setSelectedMeatPoint(product.requiresMeatPoint ? MEAT_POINTS[1] : '');
     setSelectedAddons([]);
     setObservation('');
+    setComboBurger1('');
+    setComboBurger2('');
+    setComboSide('');
   }, [product]);
 
   const toggleAddon = (addon: ProductAddon) => {
@@ -48,10 +60,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       alert('Por favor, escolha o ponto da carne.');
       return;
     }
+    
+    if (product.isCustomCombo) {
+      if (!comboBurger1 || !comboBurger2) {
+        alert('Por favor, selecione os dois hambúrgueres do combo.');
+        return;
+      }
+      if (!comboSide) {
+        alert('Por favor, selecione o acompanhamento do combo.');
+        return;
+      }
+    }
+
     onAddToCart(product, quantity, {
       meatPoint: selectedMeatPoint,
       addons: selectedAddons,
       observation,
+      comboSelections: product.isCustomCombo ? {
+        burger1: comboBurger1,
+        burger2: comboBurger2,
+        side: comboSide,
+      } : undefined,
     });
     onClose();
   };
@@ -118,6 +147,60 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </label>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {product.isCustomCombo && (
+            <div className="bg-[#1a1a20] border border-zinc-800/80 rounded-2xl p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Monte seu Combo
+                </span>
+                <span className="text-[10px] font-bold bg-orange-600/30 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/30">
+                  Obrigatório
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-300 block">1º Hambúrguer</label>
+                  <select
+                    value={comboBurger1}
+                    onChange={(e) => setComboBurger1(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs focus:border-orange-500 focus:outline-none"
+                  >
+                    <option value="">-- Selecione o 1º Lanche --</option>
+                    {availableBurgers.map(b => (
+                      <option key={`b1-${b.id}`} value={b.name}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-300 block">2º Hambúrguer</label>
+                  <select
+                    value={comboBurger2}
+                    onChange={(e) => setComboBurger2(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs focus:border-orange-500 focus:outline-none"
+                  >
+                    <option value="">-- Selecione o 2º Lanche --</option>
+                    {availableBurgers.map(b => (
+                      <option key={`b2-${b.id}`} value={b.name}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-300 block">Acompanhamento</label>
+                  <select
+                    value={comboSide}
+                    onChange={(e) => setComboSide(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs focus:border-orange-500 focus:outline-none"
+                  >
+                    <option value="">-- Selecione o Acompanhamento --</option>
+                    {COMBO_SIDES.map(side => (
+                      <option key={side} value={side}>{side}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           )}

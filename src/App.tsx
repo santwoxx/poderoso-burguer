@@ -316,6 +316,7 @@ export function App() {
 
       <ProductModal
         product={selectedProduct}
+        products={products}
         onClose={() => setSelectedProduct(null)}
         onAddToCart={handleAddToCart}
       />

@@ -177,6 +177,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: 'https://images.unsplash.com/photo-1594212848116-b184ebf32b89?auto=format&fit=crop&w=800&q=80',
     isAvailable: true,
     requiresMeatPoint: true,
+    isCustomCombo: true,
     availableAddons: COMMON_ADDONS,
   },
   {
