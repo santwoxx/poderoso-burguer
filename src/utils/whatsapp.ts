@@ -1,6 +1,6 @@
 import type { Order } from '../types';
 import { STORE_INFO } from '../data/mockData';
-import { buildComandaUrl, orderToComanda, type Comanda } from './orderCode';
+import { orderToComanda, type Comanda } from './orderCode';
 
 export function formatBRL(value: number): string {
   return `R$ ${value.toFixed(2).replace('.', ',')}`;

@@ -39,7 +39,7 @@ import {
   loadGuestProfile,
   saveGuestProfile,
 } from './utils/storage';
-import { readComandaFromUrl, decodeComanda, type Comanda } from './utils/orderCode';
+import { decodeComanda, type Comanda } from './utils/orderCode';
 import { generateStoreOrderWhatsAppLink } from './utils/whatsapp';
 import { STORE_INFO, ADMIN_EMAILS } from './data/mockData';
 import { MessageCircle, Printer } from 'lucide-react';
