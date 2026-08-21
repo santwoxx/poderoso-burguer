@@ -106,7 +106,6 @@ export function App() {
 
   // Track Firebase Auth state to detect Admin logins (Google Sign-In)
   useEffect(() => {
-    if (initialComanda) return;
     return onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
       setAuthChecked(true);
@@ -309,6 +308,37 @@ export function App() {
 
   // Link de comanda: tela do balcão, aberta a partir da mensagem do WhatsApp
   if (initialComanda !== null || new URLSearchParams(window.location.search).has('comanda')) {
+    if (!authChecked) {
+      return <Splash label="Verificando acesso..." />;
+    }
+
+    if (!isAdmin) {
+      return (
+        <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans selection:bg-orange-500 selection:text-black">
+          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-2 border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.15)]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-white font-display">Acesso Restrito</h1>
+          <p className="text-sm text-zinc-400 max-w-sm">
+            Apenas administradores podem visualizar a comanda. Se você é da equipe, faça login para continuar.
+          </p>
+          <button
+            onClick={async () => {
+              const { signInWithPopup } = await import('firebase/auth');
+              const { auth, googleProvider } = await import('./config/firebase');
+              signInWithPopup(auth, googleProvider).catch(console.error);
+            }}
+            className="mt-4 bg-white hover:bg-zinc-200 text-black px-6 py-3 rounded-xl font-bold text-sm transition-colors shadow-lg"
+          >
+            Fazer login com Google
+          </button>
+        </div>
+      );
+    }
+
     return (
       <Suspense fallback={<Splash label="Abrindo comanda..." />}>
         <ComandaPage comanda={initialComanda} />
