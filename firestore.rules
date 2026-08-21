@@ -60,11 +60,20 @@ service cloud.firestore {
     // O ID do documento é sempre o UID do Firebase Auth do próprio cliente.
     match /customers/{uid} {
       // O cliente só pode ler/criar/editar o próprio cadastro; o Administrador pode ler qualquer um
+      // Também permitimos a escrita para perfis de convidados (sem login, iniciados com g_)
       allow get: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if (request.auth != null && request.auth.uid == uid) || uid.matches('^g_.*');
       // Apenas o Administrador pode listar todos os clientes (aba Clientes do Painel) ou excluir um cadastro
       allow list: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // 6. Coleção de Comandas (para o link curto do WhatsApp)
+    match /comandas/{comandaId} {
+      // Qualquer cliente pode criar (salvar a comanda no momento do pedido)
+      allow create: if true;
+      // Apenas o Administrador pode ler as comandas (garante segurança do link curto)
+      allow read: if isAdmin();
     }
   }
 }

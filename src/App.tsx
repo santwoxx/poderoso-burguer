@@ -115,14 +115,19 @@ export function App() {
 
   useEffect(() => {
     if (shortIdParam) {
-      import('./services/firebaseService').then(({ fetchComandaDb }) => {
-        fetchComandaDb(shortIdParam).then((data) => {
-          if (data) setInitialComanda(data as Comanda);
-          setIsLoadingComanda(false);
+      if (!authChecked) return;
+      if (isAdmin) {
+        import('./services/firebaseService').then(({ fetchComandaDb }) => {
+          fetchComandaDb(shortIdParam).then((data) => {
+            if (data) setInitialComanda(data as Comanda);
+            setIsLoadingComanda(false);
+          });
         });
-      });
+      } else {
+        setIsLoadingComanda(false);
+      }
     }
-  }, [shortIdParam]);
+  }, [shortIdParam, authChecked, isAdmin]);
 
   const [sentOrder, setSentOrder] = useState<SentOrder | null>(null);
   const [lastOrder, setLastOrder] = useState(() => (isComandaRoute ? null : loadLastOrderLink()));
