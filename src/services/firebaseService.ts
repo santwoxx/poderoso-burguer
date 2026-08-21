@@ -26,6 +26,7 @@ const COLLECTIONS = {
   NEIGHBORHOODS: 'neighborhoods',
   SETTINGS: 'settings',
   CUSTOMERS: 'customers',
+  COMANDAS: 'comandas',
 };
 
 // Firestore rejeita campos com valor undefined (ex: campos opcionais não preenchidos).
@@ -292,5 +293,30 @@ export async function deleteCustomerDb(uid: string): Promise<void> {
     await deleteDoc(doc(db, COLLECTIONS.CUSTOMERS, uid));
   } catch (e) {
     console.error('Error deleting customer from Firestore:', e);
+  }
+}
+
+/**
+ * Salva a comanda no Firestore para gerar um link curto.
+ */
+export async function saveComandaDb(displayId: string, payload: any): Promise<void> {
+  try {
+    const docId = displayId.replace(/\D/g, ''); // Usa apenas os números do displayId como ID
+    await setDoc(doc(db, COLLECTIONS.COMANDAS, docId), sanitizeForFirestore(payload));
+  } catch (e) {
+    console.error('Error saving comanda to Firestore:', e);
+  }
+}
+
+/**
+ * Busca uma comanda no Firestore pelo ID curto.
+ */
+export async function fetchComandaDb(shortId: string): Promise<any | null> {
+  try {
+    const snap = await getDoc(doc(db, COLLECTIONS.COMANDAS, shortId));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    console.error('Error fetching comanda from Firestore:', e);
+    return null;
   }
 }

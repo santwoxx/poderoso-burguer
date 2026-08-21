@@ -84,7 +84,12 @@ export function buildStoreOrderMessage(comanda: Comanda, comandaUrl: string): st
 /** Link do WhatsApp da loja já com o pedido e o link da comanda prontos para enviar */
 export function generateStoreOrderWhatsAppLink(order: Order): { link: string; comandaUrl: string } {
   const comanda = orderToComanda(order);
-  const comandaUrl = buildComandaUrl(order);
+  
+  // O link agora usa apenas um ID curto (?c=1234) em vez de codificar tudo
+  const shortId = order.displayId.replace(/\D/g, '');
+  const { origin, pathname } = window.location;
+  const comandaUrl = `${origin}${pathname.replace(/index\.html$/, '')}?c=${shortId}`;
+  
   const text = encodeURIComponent(buildStoreOrderMessage(comanda, comandaUrl));
   return { link: `https://wa.me/${STORE_INFO.whatsapp}?text=${text}`, comandaUrl };
 }

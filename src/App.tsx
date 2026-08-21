@@ -39,7 +39,7 @@ import {
   loadGuestProfile,
   saveGuestProfile,
 } from './utils/storage';
-import { readComandaFromUrl } from './utils/orderCode';
+import { readComandaFromUrl, decodeComanda, type Comanda } from './utils/orderCode';
 import { generateStoreOrderWhatsAppLink } from './utils/whatsapp';
 import { STORE_INFO, ADMIN_EMAILS } from './data/mockData';
 import { MessageCircle, Printer } from 'lucide-react';
@@ -77,8 +77,7 @@ const Splash = ({ label }: { label: string }) => (
   </div>
 );
 
-// A comanda é lida uma única vez, no boot: se o link tiver pedido, esta é a tela.
-const initialComanda = readComandaFromUrl();
+// A comanda legacy era lida de forma síncrona. Agora pegamos o ID e checamos depois.
 
 export function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -103,8 +102,30 @@ export function App() {
   const [isDeliveryCalculatorOpen, setIsDeliveryCalculatorOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  // Handling short comanda link
+  const urlParams = new URLSearchParams(window.location.search);
+  const shortIdParam = urlParams.get('c');
+  const legacyComandaParam = urlParams.get('comanda');
+  const isComandaRoute = !!(shortIdParam || legacyComandaParam);
+
+  const [initialComanda, setInitialComanda] = useState<Comanda | null>(() => {
+    return legacyComandaParam ? decodeComanda(legacyComandaParam) : null;
+  });
+  const [isLoadingComanda, setIsLoadingComanda] = useState(!!shortIdParam);
+
+  useEffect(() => {
+    if (shortIdParam) {
+      import('./services/firebaseService').then(({ fetchComandaDb }) => {
+        fetchComandaDb(shortIdParam).then((data) => {
+          if (data) setInitialComanda(data as Comanda);
+          setIsLoadingComanda(false);
+        });
+      });
+    }
+  }, [shortIdParam]);
+
   const [sentOrder, setSentOrder] = useState<SentOrder | null>(null);
-  const [lastOrder, setLastOrder] = useState(() => (initialComanda ? null : loadLastOrderLink()));
+  const [lastOrder, setLastOrder] = useState(() => (isComandaRoute ? null : loadLastOrderLink()));
 
   // Track Firebase Auth state to detect Admin logins (Google Sign-In)
   useEffect(() => {
@@ -148,7 +169,7 @@ export function App() {
 
   // Cardápio, bairros e tema em tempo real (o pedido em si não passa mais pelo banco)
   useEffect(() => {
-    if (initialComanda) return;
+    if (isComandaRoute) return;
 
     const unsubProducts = subscribeProducts(setProducts);
     const unsubNeighborhoods = subscribeNeighborhoods((liveNeighs) => {
@@ -251,6 +272,13 @@ export function App() {
         blocked: !opened,
       });
 
+      // Salva a comanda no banco para o link curto
+      import('./services/firebaseService').then(({ saveComandaDb }) => {
+         import('./utils/orderCode').then(({ orderToComanda }) => {
+            saveComandaDb(newOrder.displayId, orderToComanda(newOrder));
+         });
+      });
+
       const lastOrderInfo = {
         displayId: newOrder.displayId,
         comandaUrl,
@@ -322,9 +350,9 @@ export function App() {
   const cartTotal = useMemo(() => cart.reduce((sum, i) => sum + i.totalPrice, 0), [cart]);
 
   // Link de comanda: tela do balcão, aberta a partir da mensagem do WhatsApp
-  if (initialComanda !== null || new URLSearchParams(window.location.search).has('comanda')) {
-    if (!authChecked) {
-      return <Splash label="Verificando acesso..." />;
+  if (isComandaRoute) {
+    if (!authChecked || isLoadingComanda) {
+      return <Splash label={isLoadingComanda ? "Carregando comanda..." : "Verificando acesso..."} />;
     }
 
     if (!isAdmin) {
