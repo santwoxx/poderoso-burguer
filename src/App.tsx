@@ -36,6 +36,8 @@ import {
   loadNeighborhoods,
   saveLastOrderLink,
   loadLastOrderLink,
+  loadGuestProfile,
+  saveGuestProfile,
 } from './utils/storage';
 import { readComandaFromUrl } from './utils/orderCode';
 import { generateStoreOrderWhatsAppLink } from './utils/whatsapp';
@@ -117,7 +119,7 @@ export function App() {
   // pré-preenchido, mesmo em uma sessão nova (a sessão do Google persiste no navegador).
   useEffect(() => {
     if (!firebaseUser || isAdmin) {
-      setUserProfile(null);
+      setUserProfile(loadGuestProfile());
       return;
     }
 
@@ -261,7 +263,7 @@ export function App() {
       // Cadastro do cliente — com ou sem login — é o que alimenta o Painel
       registerCustomerFromOrder(newOrder, userProfile);
 
-      if (userProfile) {
+      if (userProfile && userProfile.source === 'google') {
         const updatedProfile: CustomerProfile = {
           ...userProfile,
           name: newOrder.customerName,
@@ -271,6 +273,19 @@ export function App() {
         };
         setUserProfile(updatedProfile);
         saveCustomerProfileDb(updatedProfile);
+      } else {
+        const guestProfile: CustomerProfile = {
+          uid: 'g_' + newOrder.customerPhone.replace(/\D/g, ''),
+          name: newOrder.customerName,
+          phone: newOrder.customerPhone,
+          address: newOrder.address,
+          source: 'guest',
+          email: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setUserProfile(guestProfile);
+        saveGuestProfile(guestProfile);
       }
     },
     [userProfile]

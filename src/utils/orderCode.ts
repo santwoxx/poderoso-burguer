@@ -1,4 +1,5 @@
 import type { Order, PaymentMethod, CustomerAddress } from '../types';
+import { strToU8, strFromU8, zlibSync, unzlibSync } from 'fflate';
 
 /**
  * O pedido não fica salvo em banco nenhum: ele é codificado dentro da própria URL
@@ -150,8 +151,7 @@ function unpack(p: PackedComanda): Comanda {
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text);
+function toBase64Url(bytes: Uint8Array): string {
   let binary = '';
   const CHUNK = 0x8000;
   for (let i = 0; i < bytes.length; i += CHUNK) {
@@ -160,21 +160,30 @@ function toBase64Url(text: string): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64Url(code: string): string {
+function fromBase64Url(code: string): Uint8Array {
   const base64 = code.replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
   const binary = atob(padded);
-  const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
+  return Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
 }
 
 export function encodeComanda(comanda: Comanda): string {
-  return toBase64Url(JSON.stringify(pack(comanda)));
+  const jsonStr = JSON.stringify(pack(comanda));
+  const compressed = zlibSync(strToU8(jsonStr), { level: 9 });
+  return toBase64Url(compressed);
 }
 
 export function decodeComanda(code: string): Comanda | null {
   try {
-    const parsed = JSON.parse(fromBase64Url(code)) as PackedComanda;
+    const bytes = fromBase64Url(code);
+    let json: string;
+    try {
+      json = strFromU8(unzlibSync(bytes));
+    } catch {
+      // Fallback para links antigos (não comprimidos)
+      json = new TextDecoder().decode(bytes);
+    }
+    const parsed = JSON.parse(json) as PackedComanda;
     if (parsed?.v !== 1 || !Array.isArray(parsed.i)) return null;
     return unpack(parsed);
   } catch {

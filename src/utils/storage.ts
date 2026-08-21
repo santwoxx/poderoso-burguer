@@ -8,6 +8,7 @@ const KEYS = {
   SETTINGS: 'poderoso_burguer_settings',
   REGISTERED_CUSTOMERS: 'poderoso_burguer_registered_customers',
   LAST_ORDER: 'poderoso_burguer_last_order',
+  GUEST_PROFILE: 'poderoso_burguer_guest_profile',
 };
 
 function get<T>(key: string, fallback: T): T {
@@ -108,4 +109,12 @@ export function loadLastOrderLink(): { displayId: string; comandaUrl: string; wh
     KEYS.LAST_ORDER,
     null
   );
+}
+
+export function saveGuestProfile(profile: any): void {
+  set(KEYS.GUEST_PROFILE, profile);
+}
+
+export function loadGuestProfile(): any | null {
+  return get<any | null>(KEYS.GUEST_PROFILE, null);
 }
