@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Title & SEO -->
+    <title>Poderoso Burguer - Cardápio Digital & Pedidos Online</title>
+    <meta name="description" content="Peça os melhores hambúrgueres artesanais na brasa da cidade com entrega rápida e rastreamento em tempo real." />
+    
+    <!-- PWA & Mobile Web App Meta -->
+    <meta name="theme-color" content="#0c0c0e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Poderoso Burguer" />
+    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=192&h=192&q=80" />
+
+    <!-- Anti-Cache Headers for Vercel Deployments -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <script>
+      try {
+        var s = localStorage.getItem('poderoso_burguer_settings');
+        if (s && JSON.parse(s).theme === 'light') {
+          document.body.classList.add('light');
+        }
+      } catch (e) {}
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

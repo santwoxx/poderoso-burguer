@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Fotos de produtos do cardápio
+    match /products/{fileName} {
+      // Leitura pública das fotos (exibidas para todos os clientes)
+      allow read: if true;
+      // Apenas o Administrador pode enviar ou substituir fotos
+      allow write: if request.auth != null
+        && request.auth.token.email != null
+        && (request.auth.token.email.lower() == 'emanoelcarmo00@gmail.com' || request.auth.token.email.lower() == 'brisasofc@gmail.com');
+    }
+  }
+}
